@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Territories of China in Different Dynasties in History</title>
+	<link href="https://fonts.googleapis.com/css?family=Noto+Serif" rel="stylesheet">
+	<style>
+		html, body {
+			padding: 0;
+			margin: 0;
+			box-sizing: border-box;
+			font-family: 'Noto Serif', serif;  
+			-webkit-backface-visibility: hidden;
+			background-color: #9e6752;
+		}
+		* {
+			box-sizing: inherit;
+		}
+		h1 {
+			text-align: center;
+		}
+		svg {
+			margin:auto;
+			display:block;
+		}
+
+		.circle-overlay {
+			font-size: 10px;
+			border-radius: 80%;
+			position: center;
+			overflow: hidden;
+			/*it's buggy with the foreignObject background right now*/
+			/*background-color: rgba(255,255,255,0.5);*/
+		}
+		.circle-overlay__inner {
+			text-align: center;
+			margin-top: 50px;
+			width: 100%;
+			height: 100%;
+		}
+
+		.hidden {
+			display: none;
+		}
+		.node-icon--faded {
+			opacity: 0.5;
+		}
+		.legend-size circle {
+			fill: rgb(31, 119, 180);
+		}
+	</style>
+</head>
+<body>
+	<h1>The Territories of China in Different Dynasties in History</h1>
+	<svg width="100%" height="700" font-family="Noto Serif" font-size="10" text-anchor="middle"></svg>
+
+	<script src="js/d3.min.js"></script>
+	<script src="js/d3-legend.min.js"></script>
+	<script>
+		// Based loosely from this D3 bubble graph https://bl.ocks.org/mbostock/4063269
+		// And this Forced directed diagram https://bl.ocks.org/mbostock/4062045
+		let data = [{
+			cat: 'Unified dynasty:BC221-1911', name: 'QIN', value: 10,
+			icon: 'img/1QIN.png',
+			desc: `
+				QIN was the first feudal dynasty in the history of China. Established the feudal dynastic system, followed by the hundred generations. Successfully resisted foreign invasion and built the Great Wall
+			`
+		}, {
+			cat: 'Unified dynasty:BC221-1911', name: 'WESTERN HAN', value: 70,
+			icon: 'img/2HAN.png',
+			desc: `
+				For the first time, there was the concept of han nationality and Chinese nation. Laid the political map of China. Han also improved the county system.Established the exclusive status of Confucianism
+			`
+		}, {
+			cat: 'Unified dynasty:BC221-1911', name: 'EASTERN HAN', value: 70,
+			icon: 'img/1HAN.png',
+			desc: `
+				The eastern Han dynasty had outstanding achievements in culture, science and technology. Zheng Xuan pushed the study of Confucian classics to its peak and initiated zheng learning. Cai Lun improved paper making; Zhang Heng invented the seismograph and the astrolabe. 
+			`
+		}, {
+			cat: 'Unified dynasty:BC221-1911', name: 'WESTERN JIN', value: 17,
+			icon: 'img/4XIJIN.png',
+			desc: `
+				The cremation system was formed in XIJIN.Cao PI, emperor wen of wei, in order to restrain the corruption of the officials, adopted Chen qun's opinion and set the county at the right position. 
+
+			`
+		}, {
+			cat: 'Unified dynasty:BC221-1911', name: 'SUI', value: 12,
+			icon: 'img/7SUI.png',
+			desc: `
+				One of the outstanding contributions of the sui dynasty was the construction of the grand canal. It Strengthened communication between north and south China. Turn several natural water systems into one big one.Promote the prosperity of the cities along the river.
+`
+		}, {
+			cat: 'Unified dynasty:BC221-1911', name: 'TANG', value: 100,
+			icon: 'img/8TANG.png',
+			desc: `
+				Tang dynasty is the earliest to "open" in the history of Chinese historical period of the tang dynasty and Korea, Japan and southeast Asia, South Asia countries have widespread economic and cultural exchanges.
+
+			`
+		},{
+			cat: 'Unified dynasty:BC221-1911', name: 'NORTHERN SONG', value: 55,
+			icon: 'img/10BEISONG.png',
+			desc: `
+				The invention of gunpowder, the compass and movable type printing. The song dynasty accounted for three of the four great inventions of ancient China. The song dynasty was the first country in the world to make hot weapons. The compass was equipped with ocean-going ships in the northern song dynasty.
+			`
+		}, {
+			cat: 'Unified dynasty:BC221-1911', name: 'YUAN', value: 30,
+			icon: 'img/12YUAN.png',
+			desc: `
+				With its advanced military technology and advanced firearms, the Mongol army was the most powerful in the world at that time. The yuan dynasty brought about the great unification of China once again and the great integration of all ethnic groups once again. In the local establishment of the provincial system, is still in use today. Paper money became the currency and promoted commerce.
+			`
+		}, {
+			cat: 'Unified dynasty:BC221-1911', name: 'MING', value: 33,
+			icon: 'img/13MING.png',
+			desc: `
+				Zheng he's voyages to the western seas enabled the Ming dynasty to establish a political system in southeast Asia.It expanded overseas trade and affected China's domestic handicraft production. He left the "zheng he's charts", which is the world's earliest extant nautical atlas and valuable data for ocean voyages.
+			`
+		}, {
+			cat: 'Unified dynasty:BC221-1911', name: 'QING', value: 90,
+			icon: 'img/14QING.png',
+			desc: `
+				The most important significance of the qing dynasty to the formation of modern China is that it made today's China an entity of geography and nationality. Only the manchurian empire could successfully formulate policies to govern a vast territory and design complex administrative and military machinery to consolidate the most stable and sustained empire in Chinese history.
+			`
+		}, {
+			cat: 'the Three Kingdoms:220-280', name: 'WU', value: 20,
+			icon: 'img/3WU.png',
+			desc: `
+				The state of wu, one of The Three Kingdoms, was established by sun quan in southeast China under the name "wu", which historians call sun wu. Wu was the longest lasting country among The Three Kingdoms. Wu vigorously developed economy and made great contributions to the development of jiangnan region.
+			`
+		}, {
+			cat: 'the Three Kingdoms:220-280', name: 'WEI', value: 15,
+			icon: 'img/3WEI.png',
+			desc: `
+				Wei is the most powerful country of The Three Kingdoms. In the wei dynasty, the most important reform was the zhongzheng system of nine goods of Chen qun, which had a profound influence on the politics of the two jin and the southern and northern dynasties.
+			`
+		}, {
+			cat: 'the Three Kingdoms:220-280', name: 'SHU', value: 14,
+			icon: 'img/3SHU.png',
+			desc: `
+				The name of the shu han regime was han (liu bei claimed to be a continuation of the han dynasty). Because the regime it established was based in shu, it was often called "shu". Later generations gradually got used to this name, and in order to recognize the han regime established by liu bei, they called it shu han.
+			`
+		}, {
+			cat: 'the Eastern Jin Dynasty:317-420', name: 'WU', value: 10,
+			icon: 'img/5ZHAO.png',
+			desc: `
+				The former zhao, also known as the han zhao, was one of the "sixteen states" during the period of the five hu sixteen states, and was a regime established by the huns in the late western jin dynasty.
+			`
+		}, {
+			cat: 'the Eastern Jin Dynasty:317-420', name: 'LIANG', value: 10,
+			icon: 'img/5LIANG.png',
+			desc: `
+				WuZhaoWang Gao Li is claimed by Tang dynasty royal Li Shihe,Li Bai as ancestors. Because its government ruled the ancient areas for liangzhou, the former national name for "Liang", and located in the west of liangzhou, so called "xiliang".
+			`
+		} , {
+			cat: 'the Eastern Jin Dynasty:317-420', name: 'ZHAO', value: 10,
+			icon: 'img/5ZHAOS.png',
+			desc: `
+				The later zhao was the regime established by shi le, the leader of jie nationality in the period of sixteen states. In the early period of the later zhao dynasty, hu and han still adopted the policy of separate administration, but paid attention to encircle han scholars, reduce rent and tax, develop agricultural production, and carry out Confucian education.
+			`
+		}, /*{
+			cat: 'workflow', name: 'Browserify', value: 10,
+			icon: '',
+		},*/ {
+			cat: 'the Eastern Jin Dynasty:317-420', name: 'YAN', value: 10,
+			icon: 'img/5SHU.png',
+			desc: `
+				The former yan was a regime established by murong jun, head of the xianbei noble family in the period of the sixteen states. The former yan was the former site of the state of yan during the warring states period.
+			`
+		},/*{
+			cat: 'framework', name: 'Foundation', value: 10,
+			icon: '',
+		},*/{
+			cat: 'the Northern and Southern Dynasties:420-580', name: 'CHEN', value: 10,
+			icon: 'img/6CHEN.png',
+			desc: `
+				The Chen dynasty, also known as the southern or southern Chen in Chinese history, was the last dynasty of the southern dynasty during the southern and northern dynasties of China. In ancient history, it was the only dynasty whose name was the surname，Chen.
+			`
+		}, {
+			cat: 'the Northern and Southern Dynasties:420-580', name: 'ZHOU', value: 10,
+			icon: 'img/6ZHOU.png',
+			desc: `
+				The northern zhou was one of the northern dynasties in Chinese history. In the later period of the northern zhou dynasty, emperor wu of the zhou dynasty destroyed qi and unified the north, which was of great significance in history. It put an end to nearly half a century of division since the wei dynasty, and laid a solid foundation for the unification of China in sui dynasty.
+			`
+		}, {
+			cat: 'the Northern and Southern Dynasties:420-580', name: 'QI', value: 10,
+			icon: 'img/6QI.png',
+			desc: `
+				Liu zhun made xiao dao king of qi. Later, xiao daocheng was proclaimed emperor by zen, and took "qi" as his name. In order to distinguish from the northern qi founded by gao Yang in the northern dynasty, historians usually add the ruler's surname xiao qi in front of it. Because it lives in jiangnan, and have the name of Southern Qi.
+			`
+		}, {
+			cat: 'Five Dynasties and Ten Kingdoms:891-979', name: 'SHU', value: 10,
+			icon: 'img/9SHU.png',
+			desc: `
+				During the eighteen years after the establishment of the former shu, there were few large-scale wars. When wang yan succeeded to the throne, he indulged in extravagance and extravagance, built palaces and cruised around the counties, spending a large amount of money and increasing the burden on the people. Politics was very corrupt.
+			`
+		}, {
+			cat: 'Five Dynasties and Ten Kingdoms:891-979', name: 'CHU', value: 20,
+			icon: 'img/9CHU.png',
+			desc: `
+				The state of chu, one of the ten southern states during the five dynasties period, was the only regime established with hunan as the center in history. The southern chu eliminated the separatist forces in hunan and realized the unification of hunan. The people gained a relatively stable environment.
+			`
+		}, {
+			cat: 'Five Dynasties and Ten Kingdoms:891-979', name: 'LIANG', value: 10,
+			icon: 'img/9LIANG.png',
+			desc: `
+				The later liang, or liang dynasty, was the first of the five dynasties. King of liang usurped the title of emperor of the tang dynasty. The tang dynasty officially fell, and the Chinese history entered the five dynasties and ten kingdoms period. The later liang carried out the two-capital system, with kaifeng in the east and luoyang in the west
+			`
+		}, {
+			cat: 'Five Dynasties and Ten Kingdoms:891-979', name: 'MIN', value: 15,
+			icon: 'img/9MIN.png',
+			desc: `
+				The development of Min was mainly reflected in the reign of wang shenzhi. Wang shenzhi made remarkable achievements in the construction and development of economy and culture for the social stability and stability of fujian in the five dynasties period at the end of tang dynasty, and was praised by later generations.
+			`
+		}, {
+			cat: 'Five Dynasties and Ten Kingdoms:891-979', name: 'HAN', value: 20,
+			icon: 'img/9HAN.png',
+			desc: `
+				In the long history of China, there have been some dynasties with very short survival time, especially the later han dynasty in the five dynasties and ten kingdoms period. As the most short-lived dynasty, the later han dynasty had 2.5 emperors during its existence, although it lasted less than 4 years.
+			`
+		}, {
+			cat: 'Five Dynasties and Ten Kingdoms:891-979', name: 'YUE', value: 25,
+			icon: 'img/9YUE.png',
+			desc: `
+				Wuyue is a relatively stable area. The state was also in charge of water conservancy. The state was in charge of regulating the river and building embankments. Through these measures, so that the territory of agricultural production to develop.
+			`
+		}, {
+			cat: 'Five Dynasties and Ten Kingdoms:891-979', name: 'Tang', value: 10,
+			icon: 'img/9WU.png',
+			desc: `
+				South Tang was the country with the highest level of economic and cultural prosperity, scientific and technological progress and opening to the outside world during the five dynasties and ten countries period, which laid a solid foundation for the economic development of the later song dynasty.
+			`
+		}, {
+			cat: 'Five Dynasties and Ten Kingdoms:891-979', name: 'JIN', value: 10,
+			icon: 'img/9JIN.png',
+			desc: `
+				In the later jin dynasty, a total of two emperors experienced 12 years, another known as the shi jin, the initial capital of luoyang, later moved to kaifeng.
+			`
+		}, {
+			cat: 'Five Dynasties and Ten Kingdoms:891-979', name: 'ZHOU', value: 10,
+			icon: 'img/9ZHOU.png',
+			desc: `
+				The latter zhou was the last central plains dynasty of the five dynasties. Guo wei called himself the descendant of guo shu of the zhou dynasty.
+			`
+		}, /*{
+			cat: 'Five Dynasties and Ten Kingdoms:891-979', name: 'Elastic Search', value: 10,
+			icon: 'Elastic;Search',
+			desc: `
+				A specialized database software for high performance search queries.
+			`
+		}, {
+			cat: 'Five Dynasties and Ten Kingdoms:891-979', name: 'Keystone CMS', value: 50,
+			icon: 'img/keystonejs.png',
+			desc: `
+				The de-facto CMS system for website built with Node.js. It can be compared with
+				Wordpress of PHP language.
+			`
+		}, {
+			cat: 'Five Dynasties and Ten Kingdoms:891-979', name: 'KoaJS', value: 10,
+			icon: 'img/koajs.png',
+			desc: `
+				The advanced and improved version of ExpressJS, with leaner middlewares architecture
+				thanks to the avent of ES6 generators.
+			`
+		}, {
+			cat: 'Five Dynasties and Ten Kingdoms:891-979', name: 'Loopback', value: 30,
+			icon: 'img/loopback.svg',
+			desc: `
+				Powerful API-focused web framework built for Node.js. It feature easy to use configurations
+				and auto API documentation page.
+			`
+		}, {
+			cat: 'Five Dynasties and Ten Kingdoms:891-979', name: 'Restify', value: 20,
+			icon: 'img/restify.png',
+			desc: `
+				High performance API development framework, built for Node.js. It has some convenient wrapper
+				to automatically generate admin backoffice site and API documentation page.
+			`
+		}, {
+			cat: 'Five Dynasties and Ten Kingdoms:891-979', name: 'MongoDB', value: 70,
+			icon: 'img/mongodb.png',
+			desc: `
+				The de-facto Database solution for JavaScript and Node.js applications. It is a light weight,
+				high performance NoSQL database and can be used for small and large websites.
+			`
+		}, */{
+			cat: 'the Southern Song Dynasty:1127-1279', name: 'SONG', value: 17,
+			icon: 'img/11SONG.png',
+			desc: `
+				After the change of jingkang, zhao gou, the ninth son of emperor huizong of the song dynasty, survived and settled the capital of nanjing at yingtianfu. It was a dynasty with a prosperous economy and culture and a high degree of opening-up in Chinese history. The direct cause of the demise of the southern song dynasty was the devastating blow of the mobei nomads on the agricultural production relations of the song dynasty.
+			`
+		}, {
+			cat: 'the Southern Song Dynasty:1127-1279', name: 'JIN', value: 40,
+			icon: 'img/11JIN.png',
+			desc: `
+				It was a feudal dynasty established by the nuzhen nationality in Chinese history. Jin was the first dynasty in history to propose the "unification of China". Zaju and drama developed quite well in the jin dynasty, which laid the foundation for the later zaju in the yuan dynasty.
+			`
+		}, {
+			cat: 'the Southern Song Dynasty:1127-1279', name: 'LIAO', value: 70,
+			icon: 'img/10LIAO.png',
+			desc: `
+				The liao was a dynasty founded by the khitan in Chinese history. The liao dynasty put the emphasis on the development of ethnic groups. In order to maintain the national character, it separated and controlled the nomadic and agricultural ethnic groups, advocated governing according to the customs, and created a bicameral political system.
+			`
+		}, {
+			cat: 'the Southern Song Dynasty:1127-1279', name: 'XIA', value: 70,
+			icon: 'img/11XIA.png',
+			desc: `
+				The western xia generally won the wars between the song and the xia and the liao, forming a situation of three kingdoms standing side by side. After the death of emperor xia jingzong, the power was controlled by the empress dowager of the emperor and his mother party.
+			`
+		},/* {
+			cat: 'platform', name: 'Reaction Commerce', value: 20,
+			icon: 'img/reactioncommerce.png',
+			desc: `
+				Reaction Commerce is the first open source, real-time platform to
+				combine the flexibility developers and designers want with the stability
+				and support businesses need. ReactionCommerce is based on MeteorJS platform.
+			`
+		}, {
+			cat: 'platform', name: 'ReactNative', value: 10,
+			icon: 'img/reactnative.png',
+			desc: `
+				React Native lets you build mobile apps using only JavaScript.
+				It uses the same design as React, letting us compose a rich
+				mobile UI from declarative components.
+			`
+		},*//* {
+			cat: 'platform', name: 'SquareSpace', value: 30,
+			icon: 'img/squarespace.svg',
+			desc: `
+				Squarespace is a SaaS-based content management system-integrated ecommerce-aware website builder and blogging platform.
+				At Nau, we have built a website for Squarespace using their low-level API which allowed fully customization
+				of the interface and other Front End functionalities.
+			`
+		}, {
+			cat: 'language', name: 'HTML5 & CSS3', value: 100,
+			icon: 'img/html5-css3.png',
+			desc: `
+				The languages of the Web Front End. At Nau, they are in our blood and with them we can build
+				world-class websites with any kind of visual effects or designs requested.
+			`
+		}, {
+			cat: 'language', name: 'JavaScript', value: 100,
+			icon: 'img/javascript.png',
+			desc: `
+				JavaScript is the heart of modern Web front end development and essential element of any Single Page
+				Applications. In Nau, we invest a good deal in training developers to have good control of this universal language
+				and now caplable of developing full stack websites with only JavaScript.
+			`
+		}, {
+			cat: 'language', name: 'CSS Next', value: 10,
+			icon: 'img/cssnext.png',
+			desc: `
+				The CSS language specs of the future but with the help of PostCSS (like Babel for ES6),
+				we can use CSS Next today.
+			`
+		}, {
+			cat: 'language', name: 'GraphQL', value: 50,
+			icon: 'img/graphql.svg',
+			desc: `
+				GraphQL is a data query language developed by Facebook publicly released in 2015.
+				It provides an alternative to REST and ad-hoc webservice architectures. In combination
+				with RelayJS, this combo help us reduce the time to develop web apps for weeks.
+			`
+		}, {
+			cat: 'language', name: 'LESS CSS', value: 20,
+			icon: 'img/less.svg',
+			desc: `
+				A preprocessor language to be compiled to CSS. This language is not as popular nowadays and we
+				only use them when requested.
+			`
+		}, {
+			cat: 'language', name: 'SASS (SCSS flavor)', value: 70,
+			icon: 'img/sass.png',
+			desc: `
+				This is our main CSS preprocessor language helping us lay structured foundation to CSS as well
+				as assisting on writing more convenient BEM anotations.
+			`
+		}, {
+			cat: 'language', name: 'TypeScript 2', value: 30,
+			icon: 'img/typescript.png',
+			desc: `
+				The strict-typing flavor of ECMAScript, always requires a compiler to compile to vanilla JavaScript
+				but the type checking and other syntactical sugar are exceptional. Right now, we only use it for
+				Angular 2 projects when needed.
+			`
+		}, *//* {
+			cat: 'workflow', name: 'Front End Code Guide', value: 30,
+			icon: 'Front End;Code Guide',
+			desc: `
+				Based on an existing best practice document for HTML and CSS. We're adopting it as our standards
+				and guideline.
+			`
+		}, {
+			cat: 'workflow', name: 'ESLint', value: 20,
+			icon: 'img/eslint.svg',
+			desc: `
+				The tool to check and validate JavaScript code when we develop and prevent potential issues with code.
+			`
+		}, {
+			cat: 'workflow', name: 'Gitflow Workflow', value: 70,
+			icon: 'img/gitflow.png',
+			desc: `
+				Our code version control tool is Git, and Gitflow is one of its workflow standard which
+				ensure good collaboration and avoid conflict-resolving efforts. For more info, visit: code.naustud.io
+			`
+		}, {
+			cat: 'workflow', name: 'GulpJS', value: 50,
+			icon: 'img/gulp.png',
+			desc: `
+				GulpJS is a task automation tools written for Node.js. It is among the most popular
+				Front End and Node project automation tools nowadays
+			`
+		}, {
+			cat: 'workflow', name: 'Nau Code Styles', value: 50,
+			icon: 'Nau Code Styles',
+			desc: `
+				Based on AirBnB's well-defined JavaScript code styles. Our derivation has some different standards such as
+				TAB indentation. This code style has an accompanied ESLint config.
+			`
+		}, {
+			cat: 'workflow', name: 'Stylelint', value: 50,
+			icon: 'img/stylelint.svg',
+			desc: `
+				Our on-stop tool to validate both CSS and SCSS with a set of conventions and guidelines from our best practice.
+			`
+		}, {
+			cat: 'workflow', name: 'SystemJS', value: 20,
+			icon: 'SystemJS',
+			desc: `
+				A module loader library that come along Angular 2. Its use is scarce, however.
+			`
+		}, {
+			cat: 'workflow', name: 'Webpack', value: 30,
+			icon: 'img/webpack.svg',
+			desc: `
+				A module bundler library that is becoming de-facto tool to use in ReactJS or SPA apps nowadays.
+			`
+		}, {
+			cat: 'legacy', name: 'AngularJS 1', value: 10,
+			icon: 'img/angular1.png',
+			desc: `
+				Angular 1. Deprecated
+			`
+		}, {
+			cat: 'legacy', name: 'Backbone', value: 30,
+			icon: 'img/backbone.png',
+			desc: `
+				A Model-View library. Deprecated
+			`
+		}, {
+			cat: 'legacy', name: 'Grunt & Automation Stack', value: 30,
+			icon: 'img/grunt.svg',
+			desc: `
+				Grunt task automation tool. Deprecated
+			`
+		}, {
+			cat: 'legacy', name: 'jQuery', value: 50,
+			icon: 'img/jquery.png',
+			desc: `
+				Deprecated, because <a href='http://youmightnotneedjquery.com/' target='_blank'>youmightnotneedjquery.com</a>
+			`
+		}, {
+			cat: 'legacy', name: 'RequireJS & AMD', value: 30,
+			icon: 'img/requirejs.svg',
+			desc: `
+				AMD module loader. Deprecated and replaced by ES module and Webpack.
+			`
+		}, {
+			cat: 'legacy tooling', name: 'Browser Sync', value: 40,
+			icon: 'Browser Sync',
+			desc: `
+				Web development server popular among gulp/grunt web apps. No deprecated and replaced by live-server
+				or webpackDevServer.
+			`
+		}, {
+			cat: 'legacy tooling', name: 'Git Pre-commit', value: 30,
+			icon: 'Git;Pre-commit',
+			desc: `
+				Pre-commit hook for git, now deprecated due to slow commit time. Code validation should be done
+				in the code editor.
+			`
+		}, {
+			cat: 'legacy tooling', name: 'http-server', value: 20,
+			icon: 'http-server',
+			desc: `
+				A quick test web server based on Node.js, deprecated and replaced by live-server.
+			`
+		}, {
+			cat: 'legacy tooling', name: 'LiveReload', value: 20,
+			icon: 'Live;Reload',
+			desc: `
+				A propritery auto-reload solution for web developers, now deprecated in favor of live-server and
+				hot module reload in Webpack.
+			`
+		}*/];
+	</script>
+
+	<script>
+		let svg = d3.select('svg');
+		let width = document.body.clientWidth; // get width in pixels
+		let height = +svg.attr('height');
+		let centerX = width * 0.5;
+		let centerY = height * 0.5;
+		let strength = 0.05;
+		let focusedNode;
+
+		let format = d3.format(',d');
+
+		let scaleColor = d3.scaleOrdinal()
+							.range(['#9e6752','#bda889', '#756969', '#9b9c7d', '#b7adac','#d7beb9']);
+
+		// use pack to calculate radius of the circle
+		let pack = d3.pack()
+			.size([width , height ])
+			.padding(1.5);
+
+		let forceCollide = d3.forceCollide(d => d.r + 1);
+
+		// use the force
+		let simulation = d3.forceSimulation()
+			// .force('link', d3.forceLink().id(d => d.id))
+			.force('charge', d3.forceManyBody())
+			.force('collide', forceCollide)
+			// .force('center', d3.forceCenter(centerX, centerY))
+			.force('x', d3.forceX(centerX ).strength(strength))
+			.force('y', d3.forceY(centerY ).strength(strength));
+
+		// reduce number of circles on mobile screen due to slow computation
+		if ('matchMedia' in window && window.matchMedia('(max-device-width: 767px)').matches) {
+			data = data.filter(el => {
+				return el.value >= 50;
+			});
+		}
+
+		let root = d3.hierarchy({ children: data })
+			.sum(d => d.value);
+
+		// we use pack() to automatically calculate radius conveniently only
+		// and get only the leaves
+		let nodes = pack(root).leaves().map(node => {
+			console.log('node:', node.x, (node.x - centerX) * 2);
+			const data = node.data;
+			return {
+				x: centerX + (node.x - centerX) * 3, // magnify start position to have transition to center movement
+				y: centerY + (node.y - centerY) * 3,
+				r: 0, // for tweening
+				radius: node.r, //original radius
+				id: data.cat + '.' + (data.name.replace(/\s/g, '-')),
+				cat: data.cat,
+				name: data.name,
+				value: data.value,
+				icon: data.icon,
+				desc: data.desc,
+			}
+		});
+		simulation.nodes(nodes).on('tick', ticked);
+
+		svg.style('background-color', '#e5d9d9');
+		let node = svg.selectAll('.node')
+			.data(nodes)
+			.enter().append('g')
+			.attr('class', 'node')
+			.call(d3.drag()
+				.on('start', (d) => {
+					if (!d3.event.active) simulation.alphaTarget(0.2).restart();
+					d.fx = d.x;
+					d.fy = d.y;
+				})
+				.on('drag', (d) => {
+					d.fx = d3.event.x;
+					d.fy = d3.event.y;
+				})
+				.on('end', (d) => {
+					if (!d3.event.active) simulation.alphaTarget(0);
+					d.fx = null;
+					d.fy = null;
+				}));
+
+		node.append('circle')
+			.attr('id', d => d.id)
+			.attr('r', 0)
+			.style('fill', d => scaleColor(d.cat))
+			.transition().duration(2000).ease(d3.easeElasticOut)
+				.tween('circleIn', (d) => {
+					let i = d3.interpolateNumber(0, d.radius);
+					return (t) => {
+						d.r = i(t);
+						simulation.force('collide', forceCollide);
+					}
+				})
+
+		node.append('clipPath')
+			.attr('id', d => `clip-${d.id}`)
+			.append('use')
+			.attr('xlink:href', d => `#${d.id}`);
+
+		// display text as circle icon
+		node.filter(d => !String(d.icon).includes('img/'))
+			.append('text')
+			.classed('node-icon', true)
+			.attr('clip-path', d => `url(#clip-${d.id})`)
+			.selectAll('tspan')
+			.data(d => d.icon.split(';'))
+			.enter()
+				.append('tspan')
+				.attr('x', 0)
+				.attr('y', (d, i, nodes) => (13 + (i - nodes.length / 2 - 0.5) * 10))
+				.text(name => name);
+
+		// display image as circle icon
+		node.filter(d => String(d.icon).includes('img/'))
+			.append('image')
+			.classed('node-icon', true)
+			.attr('clip-path', d => `url(#clip-${d.id})`)
+			.attr('xlink:href', d => d.icon)
+			.attr('x', d => - d.radius * 0.7)
+			.attr('y', d => - d.radius * 0.7)
+			.attr('height', d => d.radius * 2 * 0.7)
+			.attr('width', d => d.radius * 2 * 0.7)
+
+		node.append('title')
+			.text(d => (d.cat + '::' + d.name + '\n' + format(d.value)));
+
+		let legendOrdinal = d3.legendColor()
+			.scale(scaleColor)
+			.shape('circle');
+
+		let legend = svg.append('g')
+			.classed('legend-color', true)
+			.attr('text-anchor', 'start')
+			.attr('transform','translate(20,30)')
+			.style('font-size','12px')
+			.call(legendOrdinal);
+
+		let sizeScale = d3.scaleOrdinal()
+  			.domain(['Shorter Period', 'Longer Period'])
+  			.range([5, 10] )
+
+		let legendSize = d3.legendSize()
+			.scale(sizeScale)
+			.shape('circle')
+			.shapePadding(10)
+			.labelAlign('end');
+
+		let legend2 = svg.append('g')
+			.classed('legend-size', true)
+			.attr('text-anchor', 'start')
+			.attr('transform', 'translate(150, 25)')
+			.style('font-size', '12px')
+			.call(legendSize);
+
+
+		/*
+		<foreignObject class="circle-overlay" x="10" y="10" width="100" height="150">
+			<div class="circle-overlay__inner">
+				<h2 class="circle-overlay__title">ReactJS</h2>
+				<p class="circle-overlay__body">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ullam, sunt, aspernatur. Autem repudiandae, laboriosam. Nulla quidem nihil aperiam dolorem repellendus pariatur, quaerat sed eligendi inventore ipsa natus fugiat soluta doloremque!</p>
+			</div>
+		</foreignObject>
+		*/
+		let infoBox = node.append('foreignObject')
+			.classed('circle-overlay hidden', true)
+			.attr('x', -350 * 0.5 * 0.8)
+			.attr('y', -350 * 0.5 * 0.8)
+			.attr('height', 350 * 0.8)
+			.attr('width', 350 * 0.8)
+				.append('xhtml:div')
+				.classed('circle-overlay__inner', true);
+
+		infoBox.append('h2')
+			.classed('circle-overlay__title', true)
+			.text(d => d.name);
+
+		infoBox.append('p')
+			.classed('circle-overlay__body', true)
+			.html(d => d.desc);
+
+
+		node.on('click', (currentNode) => {
+			d3.event.stopPropagation();
+			console.log('currentNode', currentNode);
+			let currentTarget = d3.event.currentTarget; // the <g> el
+
+			if (currentNode === focusedNode) {
+				// no focusedNode or same focused node is clicked
+				return;
+			}
+			let lastNode = focusedNode;
+			focusedNode = currentNode;
+
+			simulation.alphaTarget(0.2).restart();
+			// hide all circle-overlay
+			d3.selectAll('.circle-overlay').classed('hidden', true);
+			d3.selectAll('.node-icon').classed('node-icon--faded', false);
+
+			// don't fix last node to center anymore
+			if (lastNode) {
+				lastNode.fx = null;
+				lastNode.fy = null;
+				node.filter((d, i) => i === lastNode.index)
+					.transition().duration(2000).ease(d3.easePolyOut)
+					.tween('circleOut', () => {
+						let irl = d3.interpolateNumber(lastNode.r, lastNode.radius);
+						return (t) => {
+							lastNode.r = irl(t);
+						}
+					})
+					.on('interrupt', () => {
+						lastNode.r = lastNode.radius;
+					});
+			}
+
+			// if (!d3.event.active) simulation.alphaTarget(0.5).restart();
+
+			d3.transition().duration(2000).ease(d3.easePolyOut)
+				.tween('moveIn', () => {
+					console.log('tweenMoveIn', currentNode);
+					let ix = d3.interpolateNumber(currentNode.x, centerX);
+					let iy = d3.interpolateNumber(currentNode.y, centerY);
+					let ir = d3.interpolateNumber(currentNode.r, centerY * 0.5);
+					return function (t) {
+						// console.log('i', ix(t), iy(t));
+						currentNode.fx = ix(t);
+						currentNode.fy = iy(t);
+						currentNode.r = ir(t);
+						simulation.force('collide', forceCollide);
+					};
+				})
+				.on('end', () => {
+					simulation.alphaTarget(0);
+					let $currentGroup = d3.select(currentTarget);
+					$currentGroup.select('.circle-overlay')
+						.classed('hidden', false);
+					$currentGroup.select('.node-icon')
+						.classed('node-icon--faded', true);
+
+				})
+				.on('interrupt', () => {
+					console.log('move interrupt', currentNode);
+					currentNode.fx = null;
+					currentNode.fy = null;
+					simulation.alphaTarget(0);
+				});
+
+		});
+
+		// blur
+		d3.select(document).on('click', () => {
+			let target = d3.event.target;
+			// check if click on document but not on the circle overlay
+			if (!target.closest('#circle-overlay') && focusedNode) {
+				focusedNode.fx = null;
+				focusedNode.fy = null;
+				simulation.alphaTarget(0.2).restart();
+				d3.transition().duration(2000).ease(d3.easePolyOut)
+					.tween('moveOut', function () {
+						console.log('tweenMoveOut', focusedNode);
+						let ir = d3.interpolateNumber(focusedNode.r, focusedNode.radius);
+						return function (t) {
+							focusedNode.r = ir(t);
+							simulation.force('collide', forceCollide);
+						};
+					})
+					.on('end', () => {
+						focusedNode = null;
+						simulation.alphaTarget(0);
+					})
+					.on('interrupt', () => {
+						simulation.alphaTarget(0);
+					});
+
+				// hide all circle-overlay
+				d3.selectAll('.circle-overlay').classed('hidden', true);
+				d3.selectAll('.node-icon').classed('node-icon--faded', false);
+			}
+		});
+
+		function ticked() {
+			node
+				.attr('transform', d => `translate(${d.x},${d.y})`)
+				.select('circle')
+					.attr('r', d => d.r);
+		}
+	</script>
+</body>
+</html>
